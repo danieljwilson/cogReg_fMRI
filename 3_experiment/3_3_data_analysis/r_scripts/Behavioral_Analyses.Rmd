@@ -1,0 +1,590 @@
+---
+title: "FoodRegfMRI: Behavioral Analyses"
+output: html_notebook
+---
+# SETUP
+## Import libraries & Load Data
+
+```{r}
+# Import Libraries
+library(tidyverse)
+library(lme4)
+library(car)
+library(ggplot2)
+library(lmerTest)
+library(broom)
+library(data.table)
+library(pander)
+#devtools::install_github("neuropsychology/psycho.R")
+
+# Load helper functions
+source("r_scripts/helper_functions.R")
+
+# Load Data
+load("data/FoodRegfMRI_dt.RData")
+dt = full_dt
+```
+
+## Manipulate Data Table
+```{r}
+# add some columns and center predictors, remove NA rows
+dt = process_data_table(dt)
+
+# Make condition dts
+dt_nat = dt[dt$cond == "Respond Naturally",]
+dt_health = dt[dt$cond == "Focus on Healthiness",]
+dt_dd = dt[dt$cond == "Decrease Desire",]
+
+# means by subject and by condition
+  # and calculate health/taste change w/baseline
+dt_subj = by_subject(dt)
+
+# Load Hause helper functions (for some reason it breaks the by_subject() function if run first)
+source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R")
+source("https://raw.githubusercontent.com/hauselin/Rcode/master/se.R")
+```
+
+## Response Variability (by Condition)
+```{r}
+# SUBJECT/RESPONSE
+sub_response_variability <- dt %>%
+  group_by(cond, subject, block) %>%
+  dplyr::summarise(sd = sd(resp, na.rm = T), resp=mean(resp, na.rm=T), n = n())
+
+pander(sub_response_variability)
+
+# how many of each response in each block
+resp_count = dt %>%
+  group_by(subject, cond, block, resp) %>%
+  dplyr::summarise(pref=mean(resp, na.rm=T), count = n())
+
+# how many trials in each block (accounts for missed trials)
+block_count = resp_count %>%
+  group_by(subject, cond, block) %>%
+  dplyr::summarise(count=sum(count)) 
+
+# take the most common response (randomly selecting one resp in case of ties)
+resp_count2 = resp_count %>%
+  group_by(subject, cond, block) %>%
+  filter(count == max(count)) %>%
+  slice(1)
+
+# add total count and diff columns
+resp_count2$trial_count = block_count$count
+resp_count2 = resp_count2 %>%
+  mutate(diff = trial_count - count)
+
+# curious if this is mostly the Decrease condition?
+cond_var = filter(resp_count2, diff<2)
+cond_var %>%
+  group_by(cond) %>%
+  summarise(count <=1)           
+
+# ALL SUBJECTS
+# NO variation
+var_0 = filter(resp_count2, diff==0)
+length(var_0$block)
+# SINGLE variation
+var_1_0 = filter(resp_count2, diff<=1)
+length(var_1_0$block)
+
+# GOOD SUBJECTS
+good_subjects = c(101:104, 106:112, 114, 116, 118:121, 123:126, 129:137, 139:140, 142:148, 150, 152:158, 162:164)
+# NO variation
+var_0_good = var_0[var_0$subject %in% good_subjects,]
+length(var_0_good$block)
+# SINGLE variation
+var_1_0_good = var_1_0[var_1_0$subject %in% good_subjects,]
+length(var_1_0_good$block)
+length(unique(var_1_0_good$subject))
+
+subs = var_1_0_good %>%
+  group_by(subject) %>%
+  summarise(n_blocks = n())
+
+filter(subs, n_blocks>5)
+plot(subs)
+
+# CORR HEALTH TASTE
+health_taste_corr = dt %>%
+  group_by(subject) %>%
+  dplyr::summarise(corr = cor(health, taste))
+
+ggplot(health_taste_corr) +
+  geom_point(aes(subject-100, corr))
+
+# bimodal?
+hist(health_taste_corr$corr, breaks = 12)
+
+# 18 subjects have a correlation over 0.3
+filter(health_taste_corr, corr>0.3)
+# 29 negative corr
+filter(health_taste_corr, corr<0)
+
+# CORR Post-Pre and Health
+health_postPre_corr = dt %>%
+  group_by(subject) %>%
+  dplyr::summarise(corr = cor(health, post_pre))
+
+ggplot(health_postPre_corr) +
+  geom_point(aes(subject-100, corr))
+
+# normal and centered around zero
+mean(health_postPre_corr$corr)
+hist(health_postPre_corr$corr)
+
+# GROUP/RESPONSE
+group_response_variability = dt %>%
+  group_by(cond) %>%
+  dplyr::summarise(sd = sd(resp, na.rm=T)) %>%
+  pander()
+
+# SUBJECT/CHOICE
+sub_choice_variability <- dt %>%
+  group_by(cond, subject) %>%
+  dplyr::summarise(sd = sd(choice, na.rm = TRUE), resp=mean(choice, na.rm=T), n = n())
+
+pander(sub_choice_variability)
+
+ggplot(sub_choice_variability) +
+  geom_point(aes(subject-100, sd, color=cond))
+
+# SUBJECT/PRE-LIKING
+pre_liking_variability <- dt %>%
+  group_by(subject) %>%
+  dplyr::summarise(sd = sd(pre_liking, na.rm = TRUE), pre_liking = mean(pre_liking, na.rm = TRUE), n = n()) %>%
+  pander()
+
+# SUBJECT RESP
+resp_variability <- dt %>%
+  group_by(subject) %>%
+  dplyr::summarise(sd = sd(resp, na.rm = TRUE), resp = mean(pre_liking, na.rm = TRUE), n = n()) %>%
+  pander()
+
+# COR pre-liking and resp variability
+cor(resp_variability$sd, pre_liking_variability$sd)
+
+```
+
+```{r}
+df_hddm = dt %>%
+  rename(subj_idx = subject, response=choice)
+
+df_hddm$cond = dplyr::recode(df_hddm$cond, "Respond Naturally" = "Natural", "Decrease Desire" = "Decrease","Focus on Healthiness" = 'Health')
+
+write.csv(df_hddm, file = "hddm/data/foodreg_fmri.csv")
+```
+
+## Add Slopes for Taste/Health
+```{r}
+# Use resp instead of choice to calculate slopes
+# Natural
+model_nc <- glmer(choice ~ taste_c + health_c + (1 + taste_c + health_c|subject),
+               data = dt_nat, family = binomial,
+               control = glmerControl(optimizer= 'bobyqa'))
+
+model_np <- lmer(resp ~ taste_c + health_c + (1 + taste_c + health_c|subject), 
+              data = dt_nat)
+
+model = model_np
+
+dt_subj$intercept[dt_subj$cond=="Respond Naturally"] = coef(model)$subject[,1]
+dt_subj$taste_slope[dt_subj$cond=="Respond Naturally"] = coef(model)$subject[,2]
+dt_subj$health_slope[dt_subj$cond=="Respond Naturally"] = coef(model)$subject[,3]
+  
+# Decrease
+model_dc <- glmer(choice ~ taste_c + health_c + (1 + taste_c + health_c|subject),
+               data = dt_dd, family = binomial,
+               control = glmerControl(optimizer= 'bobyqa'))
+
+model_dp <- lmer(resp ~ taste_c + health_c + (1 + taste_c + health_c|subject), 
+              data = dt_dd)
+
+model = model_dp
+
+dt_subj$intercept[dt_subj$cond=="Decrease Desire"] = coef(model)$subject[,1]
+dt_subj$taste_slope[dt_subj$cond=="Decrease Desire"] = coef(model)$subject[,2]
+dt_subj$health_slope[dt_subj$cond=="Decrease Desire"] = coef(model)$subject[,3]
+
+
+# Health
+model_hc <- glmer(choice ~ taste_c + health_c + (1 + taste_c + health_c|subject),
+               data = dt_health, family = binomial,
+               control = glmerControl(optimizer= 'bobyqa'))
+
+model_hp <- lmer(resp ~ taste_c + health_c + (1 + taste_c + health_c|subject), 
+              data = dt_health)
+
+model = model_hp
+
+dt_subj$intercept[dt_subj$cond=="Focus on Healthiness"] = coef(model)$subject[,1]
+dt_subj$taste_slope[dt_subj$cond=="Focus on Healthiness"] = coef(model)$subject[,2]
+dt_subj$health_slope[dt_subj$cond=="Focus on Healthiness"] = coef(model)$subject[,3]
+
+# model with everything
+# model_all <- lmer(resp ~ taste_c + health_c + cond + (1 + taste_c + health_c + cond|subject), data = dt)
+
+# summary(model_all)
+
+# Calculate difference of slopes with baseline (natural)
+dt_subj = dt_subj %>%
+  group_by(subject) %>%
+  mutate( health_slope_change = health_slope - health_slope[cond=="Respond Naturally"],
+          taste_slope_change = taste_slope - taste_slope[cond=="Respond Naturally"]
+  )
+
+# Label based on regulatory success (3 categories)
+dt_subj = dt_subj %>%
+  group_by(cond) %>%
+  mutate( health_slope_change_cat = ntile(health_slope_change, 3),
+          taste_slope_change_cat = ntile(taste_slope_change, 3)
+  )
+
+# Apply labels to original long dataframe
+dt_merged = merge(dt, dt_subj, by=c("subject", "cond"))
+```
+
+
+# BASIC ANALYSIS 
+## RTs
+### RT by Condition
+```{r}
+# Reaction time by conditions
+rts = se(data = dt, measurevar = "rt", groupvars = "cond")
+rts
+
+# Plot 
+ggplot(rts, aes(cond, rt, color = cond)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = rt-se, ymax = rt+se))
+```
+#### Stats: RT by Condition
+```{r}
+# Differences in RTs significant?
+# It is if we use dt but not for dt_subj?
+  # Which to use?
+m_rt = lmer(rt ~ cond + (1 + cond|subject), data = dt)
+summaryh(m_rt)
+#summaryh(m_rt, showTable = T, showEffectSizesTable = T)
+fit <- lmer(rt ~ cond + (1 + cond|subject), data=dt)
+anova(fit)
+
+# NOT WORKING
+# contrasts = get_contrasts(fit, formula="cond", adjust="tukey")
+
+# Anova
+anova_test = dt %>%
+  aov(rt ~ cond + Error(subject/cond), data=.)
+anova_test %>%
+  summary # Why is this p-val larger??
+# anova_test %>%
+#  TukeyHSD # this doesn't work with the Error specification in aov
+# suggests that DD/Health not sig
+
+# Contrasts nothing sig??
+t.test(dt_subj$rt[dt_subj$cond=="Decrease Desire"], 
+       dt_subj$rt[dt_subj$cond=="Focus on Healthiness"])
+t.test(dt_subj$rt[dt_subj$cond=="Decrease Desire"], 
+       dt_subj$rt[dt_subj$cond=="Respond Naturally"])
+t.test(dt_subj$rt[dt_subj$cond=="Focus on Healthiness"],
+       dt_subj$rt[dt_subj$cond=="Respond Naturally"])
+
+# Azadeh: important to select outliers (look in natural condition)
+```
+
+### RT by Condition & Choice
+```{r}
+# RT by condition
+rts = se(data = dt, measurevar = "rt", groupvars = c("cond", "choice"))
+rts$choice = plyr::mapvalues(rts$choice, c(0,1), c('Reject', 'Accept'))
+rts
+
+# Plot 
+ggplot(rts, aes(cond, rt, color = choice)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = rt-se, ymax = rt+se))
+```
+Note the gap between the accept/reject RTs for DD (consistent with starting point bias)
+
+#### Stats: RT by Condition & Choice
+```{r}
+# repeated measures Anova (two methods)
+# RT on condition + choice
+summary(aov(rt ~ cond * choice + Error(subject/(cond*choice)), data = dt, na.action = na.omit))
+fit = lmer(rt ~ cond * choice + (1 + cond * choice|subject), data=dt)
+anova(fit) # why so different than aov?
+#analyze(fit)
+
+# RT on condition + response (preference)
+summary(aov(rt ~ cond * resp + Error(subject/(cond+resp)), data = dt, na.action = na.omit))
+fit = lmerTest::lmer(rt ~ cond * resp + (1|subject), data=dt)
+anova(fit) # weird. Cond is weaker with lmer but resp and interaction stronger?
+# with random slopes
+fit <- lmer(rt ~ cond * resp + (1 + cond*resp|subject), data=dt)
+anova(fit)
+#analyze(fit)
+```
+
+
+## Acceptance Rates
+### Acceptance By Condition
+
+```{r}
+# RT by condition
+accept = se(data = dt, measurevar = "choice", groupvars = "cond")
+accept
+
+# Plot 
+ggplot(accept, aes(cond, choice, color = cond)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = choice-se, ymax = choice+se))
+```
+
+#### Stats: Acceptance By Condition
+```{r}
+# repeated measures Anova
+# Choice
+summary(aov(choice~cond + Error(subject/cond), data = dt, na.action = na.omit))
+
+fit = glmer(choice ~ cond + (1|subject),
+            data = dt, family = binomial,
+            control = glmerControl(optimizer= 'bobyqa'), nAGQ = 10)
+anova(fit)
+summaryh(fit)
+```
+
+
+### Preference by Condition
+```{r}
+# RT by condition
+pref = se(data = dt, measurevar = "resp", groupvars = "cond")
+pref
+
+# Plot 
+ggplot(pref, aes(cond, resp, color = cond)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = resp-se, ymax = resp+se))
+```
+
+#### Stats: Preference by Condition
+```{r}
+# Response (preference)
+summary(aov(resp~cond + Error(subject/cond), data = dt, na.action = na.omit))
+fit = lmerTest::lmer(resp ~ cond + (1|subject), data=dt)
+anova(fit)
+summaryh(fit)
+```
+
+
+### Acceptance By Condition and Pre liking
+```{r}
+#dt %>%
+#  group_by(cond, pre_liking) %>%
+#  summarise(rate = mean(choice, na.rm=TRUE))
+
+accept = se(data = dt, measurevar = "choice", groupvars = c("cond", "pre_liking"))
+accept
+
+# Plot 
+ggplot(accept, aes(cond, choice, color = factor(pre_liking))) +
+  geom_point() +
+  geom_errorbar(aes(ymin = choice-se, ymax = choice+se))
+```
+Note that in Focus on Health the lower three ratings (compared with Natural) are *higher* and the upper three ratings are *lower*
+
+## Correlatios of Response
+
+### Pre-liking correlation with Preference
+```{r}
+dt %>%
+  group_by(cond) %>%
+  summarise(cor = cor(pre_liking, resp))
+```
+
+### Correlation Taste and Health with Preference by condition
+
+```{r}
+dt %>%
+  group_by(cond) %>%
+  summarise(cor = cor(pre_liking, taste))
+
+dt %>%
+  group_by(cond) %>%
+  summarise(cor = cor(pre_liking, health))
+```
+
+
+# HEALTH AND TASTE
+## Taste by Condition
+```{r}
+# Taste by Cond 
+taste_weight = se(data = dt_subj, measurevar = "taste_slope", groupvars = "cond")
+taste_weight
+# Plot
+ggplot(taste_weight, aes(cond, taste_slope, color = cond)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = taste_slope-se, ymax = taste_slope+se))
+```
+
+## Health by Condition
+```{r}
+# Health by Cond 
+health_weight = se(data = dt_subj, measurevar = "health_slope", groupvars = "cond")
+health_weight
+# Plot
+ggplot(health_weight, aes(cond, health_slope, color = cond)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = health_slope-se, ymax = health_slope+se))
+```
+
+## Intercept by Condition
+```{r}
+# Intercept by Cond 
+int = se(data = dt_subj, measurevar = "intercept", groupvars = "cond")
+int
+# Plot
+ggplot(int, aes(cond, intercept, color = cond)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = intercept-se, ymax = intercept+se))
+```
+
+## Taste/Health/Int by Condition
+```{r}
+# Plot Simultaneously
+# standardize column names and add coef column
+taste_weight$coef = 'taste'
+taste_weight = taste_weight%>%
+  rename(beta = taste_slope)
+health_weight$coef = 'health'
+health_weight = health_weight%>%
+  rename(beta = health_slope)
+int$coef = 'intercept'
+int = int%>%
+  rename(beta = intercept)
+
+# Stack
+combined <- rbind(taste_weight, health_weight, int)
+combined
+
+# Plot
+ggplot(combined, aes(cond, beta, color = coef)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = beta-se, ymax = beta+se))
+```
+
+## Stats
+```{r}
+fit = lmerTest::lmer(resp ~ health*cond + taste*cond + (1 + health + taste|subject), data=dt)
+summary(fit)
+anova(fit)
+psycho::analyze(fit)
+```
+
+## Weight Change by Condition
+```{r}
+# HEALTH
+pp_health <- se(dt_subj, measurevar="health_slope_change", groupvars="cond")
+
+# Same plot
+ggplot(pp_health, aes(cond, health_slope_change, color=cond)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = health_slope_change-se, ymax = health_slope_change+se)) 
+
+# TASTE
+pp_taste <- se(dt_subj, measurevar="taste_slope_change", groupvars="cond")
+
+# Same plot
+ggplot(pp_taste, aes(cond, taste_slope_change, color=cond)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = taste_slope_change-se, ymax = taste_slope_change+se)) 
+```
+
+
+# POST PRE
+## Healthy/Unhealthy
+```{r}
+pp_health <- se(dt, measurevar="post_pre", groupvars=c("healthy","cond"))
+# Plot
+ggplot(pp_health, aes(cond, post_pre, color = healthy)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = post_pre-se, ymax = post_pre+se)) 
+```
+
+## Tasty/Untasty
+```{r}
+pp_taste <- se(dt, measurevar="post_pre", groupvars=c("tasty","cond"))
+# Plot
+ggplot(pp_taste, aes(cond, post_pre, color = tasty)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = post_pre-se, ymax = post_pre+se)) 
+```
+
+# REGULATORY SUCCESS
+## Change in Liking V Change in Health Weight (Unhealthy Foods)
+Check to see if there is a correlation between the magnitude of the subject's change
+in health weight and their *change in liking* of *unhealthy* foods
+```{r}
+# Health weight CHANGE in health condition 
+hw = dt_subj$health_slope_change[dt_subj$cond=="Focus on Healthiness"]
+
+#vs 
+#PostPre Liking change in for unhealthy foods from Health Condition
+pp = dt %>%
+  group_by(subject) %>%
+  summarise(change = mean(post_pre[cond=="Focus on Healthiness" & healthy=="unhealthy"], na.rm = TRUE))
+
+pp$hw = hw
+
+ggplotRegression(lm(change~hw, data = pp))
+```
+
+## Change in Liking V Change in Health Weight (Healthy Foods)
+```{r}
+# Health weight CHANGE in health condition 
+hw = dt_subj$health_slope_change[dt_subj$cond=="Focus on Healthiness"]
+
+#vs 
+#PostPre Liking change in for HEALTHY foods from Health Condition
+pp = dt %>%
+  group_by(subject) %>%
+  summarise(change = mean(post_pre[cond=="Focus on Healthiness" & healthy=="healthy"], na.rm = TRUE))
+
+pp$hw = hw
+
+ggplotRegression(lm(change~hw, data = pp))
+```
+
+## Change in Liking V Change in Health Weight (Healthy - Unhealthy Foods)
+```{r}
+# Health weight CHANGE in health condition 
+hw = dt_subj$health_slope_change[dt_subj$cond=="Focus on Healthiness"]
+
+#vs 
+#PostPre Liking change in for HEALTHY vs UNHEALTHY foods from Health Condition
+pp_healthy = dt %>%
+  group_by(subject) %>%
+  summarise(change = mean(post_pre[cond=="Focus on Healthiness" & healthy=="healthy"], na.rm = TRUE))
+
+pp_unhealthy = dt %>%
+  group_by(subject) %>%
+  summarise(change = mean(post_pre[cond=="Focus on Healthiness" & healthy=="unhealthy"], na.rm = TRUE))
+
+pp$change = pp_healthy$change - pp_unhealthy$change
+pp$hw = hw
+
+ggplotRegression(lm(change~hw, data = pp))
+```
+
+
+
+
+
+# Psycho Example
+https://neuropsychology.github.io/psycho.R/2018/07/20/analyze_anova.html
+```{r}
+df <- psycho::affective  # load a dataset available in the psycho package
+
+aov_results <- aov(Adjusting ~ Sex * Salary, data=df)  # Fit the ANOVA
+summary(aov_results)  # Inspect the results
+analyze(aov_results)
+```

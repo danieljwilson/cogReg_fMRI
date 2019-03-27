@@ -1,0 +1,25 @@
+# Don't track content of these folders #
+########################################
+1_project_management/
+2_ethics_governance/
+3_experiment/3_2_data/
+3_experiment/3_3_data_analysis/behavioral/ddm/hddm/*.db
+3_experiment/3_3_data_analysis/behavioral/ddm/hddm/**/*.db
+3_experiment/3_3_data_analysis/behavioral/ddm/hddm/
+3_experiment/3_3_data_analysis/behavioral/ddm/DDMAnalysis_BaseModel/fittedData/
+3_experiment/3_3_data_analysis/behavioral/ddm/DDMAnalysis_ConstantModel/fittedData/
+
+
+
+# Ignore all logs #
+###################
+*.log
+
+*.db
+*.indd
+*.pptx
+*.mat
+
+
+# Compiled source #
+###################

@@ -1,0 +1,268 @@
+---
+title: "Sacred values 4 (SV3 keyboard version) questionnaires"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+rm(list = ls())
+library(tidyverse); library(data.table); library(broom); library(dtplyr); library(lme4); library(lmerTest); library(ggbeeswarm); library(cowplot)
+
+setwd("/Users/Hause/Dropbox/Working Projects/160901 Sacred values/Analysis sacred values 4")
+# load("questionnaires.RData")
+# save.image("questionnaires.RData")
+source("/Users/Hause/Dropbox/Working Datasets/functionsR/helperFunctions.R")
+
+```
+
+```{r read data}
+dataFile <- "./DataQualtrics/Sacred_Values_4_Questionnaires_SV3_keyboard_version.csv"
+qualtrics <- tbl_dt(fread(dataFile, header = T)[-1])
+
+names(qualtrics)[duplicated(names(qualtrics))] # check duplicated column names
+qualtrics[, n_distinct(subjectID)]
+```
+
+
+```{r debrief}
+#### get debriefing stuff ####
+glimpse(qualtrics)
+debrief <- select(qualtrics, subjectID, funnelDebrief1_1:funnelDebrief1_3, funnelDebrief2_1:funnelDebrief2_3,
+                  gender:religionReason_TEXT)
+
+debrief$gender <- ifelse(debrief$gender == "1", "m", ifelse(debrief$gender == "2", "f", ""))
+debrief$religionReason
+debrief$ethnicity_TEXT
+debrief$ethnicity
+debrief[ethnicity == '1', ethnicity := 'white/caucasian']
+debrief[ethnicity == '2', ethnicity := 'asian/asian canadian']
+debrief[ethnicity == '3', ethnicity := 'african/black']
+debrief[ethnicity == '4', ethnicity := 'hispanic/latino']
+debrief[ethnicity == '5', ethnicity := 'southeast asian/indian']
+debrief[ethnicity == '6', ethnicity := 'native canadian']
+debrief[ethnicity == '7', ethnicity := 'pacific islander']
+debrief[ethnicity == '8', ethnicity := ethnicity_TEXT]
+debrief$religionDuration
+
+debrief[religionReason == "1", religionReason := "born into it"]
+debrief[religionReason == "2", religionReason := "converted into it"]
+debrief[religionReason == "3", religionReason := religionReason_TEXT]
+
+table(debrief$gender)
+debrief[, .(age = mean(as.numeric(age), na.rm = T), ageSD = sd(as.numeric(age), na.rm = T),
+            ageMin = min(as.numeric(age), na.rm = T), ageMax = max(as.numeric(age), na.rm = T))]
+# write.csv(debrief, "./DataCleaned/Debrief.csv", row.names = F)
+
+```
+
+
+```{r get questionnaires}
+inExReligious <- select(qualtrics, subjectID, starts_with("ier")) %>% tbl_df() %>% mutate_all(as.numeric) %>% tbl_dt()
+religiousZ <- select(qualtrics, subjectID, starts_with("rz")) %>% tbl_df() %>% mutate_all(as.numeric) %>% tbl_dt()
+santaClaraRegFaith <- select(qualtrics, subjectID, starts_with("scsorf")) %>% tbl_df() %>% mutate_all(as.numeric) %>% tbl_dt()
+threeFEQ <- select(qualtrics, subjectID, starts_with("three")) %>% tbl_df() %>% mutate_all(as.numeric) %>% tbl_dt()
+disgust <- select(qualtrics, subjectID, starts_with("dg")) %>% tbl_df() %>% mutate_all(as.numeric) %>% tbl_dt()
+confidence <- select(qualtrics, subjectID, starts_with("conf")) %>% tbl_df() %>% mutate_all(as.numeric) %>% tbl_dt()
+temptations <- select(qualtrics, subjectID, starts_with("tempt")) %>% tbl_df() %>% mutate_all(as.numeric) %>% tbl_dt()
+moralConviction <- select(qualtrics, subjectID, starts_with("mc")) %>% tbl_df() %>% mutate_all(as.numeric) %>% tbl_dt()
+selfControl <- select(qualtrics, subjectID, starts_with("bsc")) %>% tbl_df() %>% mutate_all(as.numeric) %>% tbl_dt()
+
+scales <- list()
+scalesWideRaw <- list()
+```
+
+
+```{r Extrinsic/intrinsic revised religiosity}
+# Extrinsic/intrinsic revised religiosity scale (I/E-R; Gorsuch & McPherson, 1989; 14 items)
+
+# convert -99 to NA
+for (j in seq_along(inExReligious)) {
+    set(inExReligious, i = which(inExReligious[[j]] == -99), j = j, value = NA)
+}
+summary(inExReligious)
+scalesWideRaw$inExReligious <- inExReligious
+
+# 1: strongly disagree
+# 5: agree strongly
+
+inexRel <- cleanQuestionnaire(data = inExReligious, scaleName = 'inExReligion', scaleMin = 1, scaleMax = 5, subscales = list(intrin = c(1, 3, 4, 5, 7, 10, 12, 14), extrin = c(2, 6, 8, 9, 11, 13)), itemsToReverse = c(3, 10, 14))
+
+ggplot(inexRel$long[inExReligion_subscale == "overall"], aes(inExReligion_m)) + geom_histogram()
+
+scales$inexRel <- inexRel
+```
+
+
+```{r religious zeal}
+# Religious Zeal Scale (McGregor et al., 2008)
+religiousZ
+scalesWideRaw$religiousZ <- religiousZ
+
+# 1 to 5 (strongly disagree to strongly agree) 
+religiousZ <-  cleanQuestionnaire(data = religiousZ, scaleName = 'religiousZ', scaleMin = 1, scaleMax = 5)
+
+ggplot(religiousZ$long, aes(religiousZ_m)) + geom_histogram()
+
+scales$religiousZ <- religiousZ
+
+```
+
+
+```{r Santa Clara Strength of Religious Faith}
+# Santa Clara Strength of Religious Faith Questionnaire (Lewis et al., 2001)
+
+santaClaraRegFaith
+apply(santaClaraRegFaith, 2, min)
+apply(santaClaraRegFaith, 2, max)
+
+scalesWideRaw$santaClaraRegFaith <- santaClaraRegFaith
+# 10 to 40 (higher = stronger levels of strength of religious faith)
+santaClara <- cleanQuestionnaire(data = santaClaraRegFaith, scaleName = 'santaClara', scaleMin = 10, scaleMax = 40)
+
+ggplot(santaClara$long, aes(santaClara_m)) + geom_histogram()
+
+scales$santaClara <- santaClara
+```
+
+
+
+
+```{r three-factor eating}
+#Three-factor eating questionnaire-R18 (de Lauzon et al., 2004)
+threeFEQ
+setnames(threeFEQ, 'threeFEQ18_1', 'threeFEQ18')
+
+# The cognitive restraint scale was composed of items 2, 11, 12, 15, 16, and 18. The uncontrolled eating scale was composed of items 1, 4, 5, 7, 8, 9, 13, 14, and 17. The emotional eating scale was composed of items 3, 6, and 10.
+# For question 18, the 1–2 scores were coded 1; 3–4 scores were coded 2; 5–6 scores were coded 3; 7–8 scores were coded 4.
+
+summary(threeFEQ)
+threeFEQ$threeFEQ18 <- ifelse(threeFEQ$threeFEQ18 %in% c(1, 2), 1, threeFEQ$threeFEQ18)
+threeFEQ$threeFEQ18 <- ifelse(threeFEQ$threeFEQ18 %in% c(3, 4), 2, threeFEQ$threeFEQ18)
+threeFEQ$threeFEQ18 <- ifelse(threeFEQ$threeFEQ18 %in% c(5, 6), 3, threeFEQ$threeFEQ18)
+threeFEQ$threeFEQ18 <- ifelse(threeFEQ$threeFEQ18 %in% c(7, 8), 4, threeFEQ$threeFEQ18)
+summary(threeFEQ)
+
+scalesWideRaw$threeFEQ <- threeFEQ
+
+threeFactor <- cleanQuestionnaire(data = threeFEQ, scaleName = 'threeFEQ', scaleMin = 1, scaleMax = 4, subscales = list(cogRes = c(2, 11, 12, 15, 16, 18), uncontrolEat = c(1, 4, 5, 7, 8, 9, 13, 14, 17), emoEat = c(3, 6, 10)))
+
+threeFactor$long %>% print(n = Inf)
+
+ggplot(threeFactor$long[threeFEQ_subscale == "overall"], aes(threeFEQ_m)) + geom_histogram()
+
+scales$threeFactor <- threeFactor
+
+```
+
+
+```{r disgust}
+# Disgust scale (Olatunji, 2007)
+disgust
+
+scalesWideRaw$disgust <- disgust
+
+dis <- cleanQuestionnaire(data = disgust, scaleName = 'disgust', scaleMin = 0, scaleMax = 1, subscales = list(coreDisgust = c(1, 2, 3, 4, 5, 12, 14, 15, 16, 17, 18, 23), animalDisgust = c(6, 7, 8, 9, 13, 19, 20, 21), contaminateDisgust = c(10, 11, 22, 24, 25)), itemsToReverse = c(1, 3, 7))
+dis
+
+ggplot(dis$long[disgust_subscale == "overall"], aes(disgust_m)) + geom_histogram()
+
+scales$dis <- dis
+
+```
+
+
+
+```{r confidence and temptations}
+
+# Self-efficacy/confidence and situational temptation measure (18 items adapted from Rossi et al., 2001 & Velicer et al., 1990)
+
+# 1 not confident/tempted at all
+# 5 extremely confident/tempted
+
+scalesWideRaw$confidence <- confidence
+scalesWideRaw$temptations <- temptations
+
+confidence
+confid <- cleanQuestionnaire(data = confidence, scaleName = 'confidence', scaleMin = 1, scaleMax = 5)
+
+temptations
+temp <- cleanQuestionnaire(data = temptations, scaleName = 'tempted', scaleMin = 1, scaleMax = 5)
+
+scales$confid <- confid
+scales$temp <- temp
+```
+
+
+
+```{r moral convictions}
+# Moral convictions (van Zomeren et al., 2012) 
+# 1: not at all
+# 7: very much
+
+# tuition fee
+mc1 <- select(moralConviction, subjectID, 2:7)
+
+# religious faith
+mc2 <- select(moralConviction, subjectID, 8:13)
+
+# religious diet
+mc3 <- select(moralConviction, subjectID, 14:19)
+
+scalesWideRaw$mc1 <- mc1
+scalesWideRaw$mc2 <- mc2
+scalesWideRaw$mc3 <- mc3
+
+
+mcTuition <- cleanQuestionnaire(data = mc1, scaleName = 'moralConTuitionFee', scaleMin = 1, scaleMax = 7)
+mcReligiousF <- cleanQuestionnaire(data = mc2, scaleName = 'moralConReligFaith', scaleMin = 1, scaleMax = 7)
+mcReligiousDiet <- cleanQuestionnaire(data = mc3, scaleName = 'moralConReligiousDiet', scaleMin = 1, scaleMax = 7)
+
+
+scales$mcTuition <- mcTuition
+scales$mcReligiousF <- mcReligiousF
+scales$mcReligiousDiet <- mcReligiousDiet
+
+```
+
+
+```{r brief self-control}
+## Brief self-control scale (Tangney 2004; 13 items)
+
+# 1 not at all
+# 5 very much
+
+selfControl
+scalesWideRaw$selfControl <- selfControl
+
+briefSC <- cleanQuestionnaire(data = selfControl, scaleName = 'briefSelfControl', scaleMin = 1, scaleMax = 5, itemsToReverse = c(2, 3, 4, 5, 7, 9, 10, 12, 13))
+scales$briefSC <- briefSC
+
+
+```
+
+
+```{r combine}
+names(scales)
+scales$dis$wide
+
+df1 <- left_join(scales$santaClara$wide, scales$religiousZ$wide) %>% 
+    left_join(scales$threeFactor$wide) %>% 
+    left_join(scales$mcTuition$wide) %>% 
+    left_join(scales$mcReligiousF$wide) %>% 
+    left_join(scales$mcReligiousDiet$wide) %>% 
+    left_join(scales$dis$wide) %>% 
+    left_join(scales$confid$wide) %>% 
+    left_join(scales$temp$wide) %>% 
+    left_join(scales$inexRel$wide) %>% 
+    left_join(scales$briefSC$wide)
+
+# write.csv(df1, "./DataCleaned/questionnaires.csv", row.names = F)
+
+```
+
+
+
+
+
+

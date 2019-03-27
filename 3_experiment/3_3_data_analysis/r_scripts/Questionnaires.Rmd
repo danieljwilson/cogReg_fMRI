@@ -1,0 +1,74 @@
+---
+title: "Questionnaires"
+author: "Daniel J Wilson"
+date: "1/14/2019"
+output: html_document
+---
+
+# SETUP
+## Import Libraries and Load Data
+```{r setup, include=FALSE}
+# Import Libraries
+library(tidyverse); library(data.table); library(broom); library(dtplyr); library(lme4); library(lmerTest); library(ggbeeswarm); library(cowplot)
+library(tibble)
+
+# Read in data
+df = as.tibble(read_csv("data/questionnaires.csv"), stringsAsFactors = FALSE)
+# Select fMRI study subjects
+fmri_sub <- grepl("FRMRI*", df[, 2][[1]])
+df = df[fmri_sub, ]
+
+# Rename Columns
+names(df)[1:13] = c("timestamp", "subject","gender","race","age","weight","height","time_in_canada", "diet_history", "diet_kind",
+              "familiar_most_food", "pre_study_food", "time_pre_study_food")
+
+# Clean up DF
+df <- df %>%
+  mutate(
+    subject = readr::parse_number(subject)
+  )
+remove(fmri_sub)
+
+# List of good subjects
+good_subjects = c(101:104, 106:112, 114, 116, 118:121, 123:126, 129:137, 139:140, 142:148, 150, 152:158, 162:164)
+# Remove excluded subjects
+df_good = df[df$subject %in% good_subjects,]
+
+# Questions about strategy
+df1  = df[,14:28]
+df2 = rev(df)[,1:12]
+
+df_strategy = cbind(df1, df2)
+
+# Clean up
+remove(df1, df2)
+```
+
+# DEMOGRAPHICS
+```{r demographics}
+# Need to add the two subjects who stopped and did not complete
+# the post scan tasks 
+# 117: 25, M
+# 141: 26, F 
+
+# https://tibble.tidyverse.org/reference/add_row.html
+
+# All Subjects
+df_demo = df[,2:5]
+df_demo = add_row(df_demo, subject = 117, gender = 'Male', age = 25)
+df_demo = add_row(df_demo, subject = 141, gender = 'Female', age = 26)
+
+table(df_demo$gender)
+tibble(age = mean(as.numeric(df_demo$age), na.rm = T), 
+       ageSD = sd(as.numeric(df_demo$age), na.rm = T),
+       ageMin = min(as.numeric(df_demo$age), na.rm = T),
+       ageMax = max(as.numeric(df_demo$age), na.rm = T))
+
+# Good Subjects
+table(df_good$gender)
+tibble(age = mean(as.numeric(df_good$age), na.rm = T), 
+       ageSD = sd(as.numeric(df_good$age), na.rm = T),
+       ageMin = min(as.numeric(df_good$age), na.rm = T),
+       ageMax = max(as.numeric(df_good$age), na.rm = T))
+
+```

@@ -1,0 +1,11 @@
+﻿stimulus,trialType,TTLStim,participant,trialNo,blockType,noGoFreq,goLetter,task,fixationFrames,postFixationFrames,targetFrames,targetRemoveFrames,startTime,endTime,firstTR,blockNumber,elapsedTime,resp,rt,iti,responseTTL,choice,overallTrialNum,acc
+m,go,11,999,1,actual,low,m,gonogo,29,,27,27,28.747642993927002,29.231050968170166,22.6430089474,1,,,,1.0,18.0,,1,0.0
+m,go,11,999,2,actual,low,m,gonogo,29,,27,27,30.21567392349243,30.69910979270935,,1,,,,1.0,18.0,,2,0.0
+m,go,11,999,3,actual,low,m,gonogo,29,,27,27,31.683717012405396,32.16706681251526,,1,,,,1.0,18.0,,3,0.0
+m,go,11,999,4,actual,low,m,gonogo,29,,27,27,33.15151286125183,33.63487887382507,,1,,,,1.0,18.0,,4,0.0
+m,go,11,999,5,actual,low,m,gonogo,29,,27,27,34.61862277984619,35.10200381278992,,1,,,,1.0,18.0,,5,0.0
+m,go,11,999,6,actual,low,m,gonogo,29,,27,27,36.0856819152832,36.569063901901245,,1,,,,1.0,18.0,,6,0.0
+m,go,11,999,7,actual,low,m,gonogo,29,,27,27,37.552751779556274,38.0361487865448,,1,,,,1.0,18.0,,7,0.0
+m,go,11,999,8,actual,low,m,gonogo,29,,27,27,39.02081489562988,39.50422692298889,,1,,7,0.172230005264,1.0,,,8,
+m,go,11,999,1,actual,high,m,gonogo,29,,27,27,39.53493785858154,40.01840400695801,2,,,,1.0,18.0,,9,0.0
+w,nogo,12,999,2,actual,high,m,gonogo,29,,27,27,41.002110958099365,41.51914691925049,2,,,,1.0,19.0,,10,1.0

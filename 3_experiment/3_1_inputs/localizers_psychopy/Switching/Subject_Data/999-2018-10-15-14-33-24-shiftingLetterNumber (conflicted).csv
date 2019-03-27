@@ -1,0 +1,9 @@
+participant,scriptDate,trialNo,blockType,task,fixationFrames,postFixationFrames,targetFrames,startTime,endTime,firstTR,blockNumber,elapsedTime,resp,rt,iti,responseTTL,choice,overallTrialNum,acc,creditsEarned,letternumber,trials,switchProportion,switches,switch,question,colourCue,correctAnswer,correctKey
+999,2018_06_27,1,practice,shiftingLetterNumber,30,,60,132.43393993377686,133.53771996498108,131.155167103,1,,,,4.0,,,1,0,0,p7,25,0.5,12,0,face,white,male,3
+999,2018_06_27,2,practice,shiftingLetterNumber,30,,60,137.52143001556396,138.60484194755554,,1,,2,0.61835193634,1.0,15.0,,2,1,1,i2,25,0.5,12,1,house,blue,old,2
+999,2018_06_27,3,practice,shiftingLetterNumber,30,,60,139.5888590812683,140.67222094535828,,1,,4,0.904636144638,3.0,15.0,,3,1,1,f8,25,0.5,12,1,face,white,female,4
+999,2018_06_27,4,practice,shiftingLetterNumber,30,,60,143.6561200618744,144.73951387405396,,1,,,,2.0,,,4,0,0,g6,25,0.5,12,0,face,white,female,4
+999,2018_06_27,5,practice,shiftingLetterNumber,30,,60,146.72437500953674,147.80779910087585,,1,,4,0.784619808197,2.0,15.0,,5,1,1,i2,25,0.5,12,0,face,white,female,4
+999,2018_06_27,6,practice,shiftingLetterNumber,30,,60,149.79242706298828,150.87585306167603,,1,,4,0.87301492691,3.0,16.0,,6,0,0,f3,25,0.5,12,1,house,blue,old,2
+999,2018_06_27,7,practice,shiftingLetterNumber,30,,60,153.86075806617737,154.94412899017334,,1,,,,5.0,,,7,0,0,n1,25,0.5,12,1,face,white,male,3
+999,2018_06_27,8,practice,shiftingLetterNumber,30,,60,159.92901992797852,161.0123860836029,,1,,,,1.0,,,8,0,0,g4,25,0.5,12,1,house,blue,old,2
