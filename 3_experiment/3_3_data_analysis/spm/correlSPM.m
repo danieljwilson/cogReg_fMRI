@@ -89,9 +89,18 @@ fprintf([
     '40 Behav: pre_m_post_change_HvD\n'...
     '41 Behav: pre_m_post_change_DvN\n'...
     
-    % GLM liking~health_rating + taste_rating * condition (weights on
+    Behav: pre_m_post_wHealth_change_HvN
+    Behav: pre_m_post_wHealth_change_DvN
+    Behav: pre_m_post_wTaste_change_HvN
+    Behav: pre_m_post_wTaste_change_DvN
+    
+    Behav: pre_m_trial_wHealth_change_HvN
+    Behav: pre_m_trial_wHealth_change_DvN
+    Behav: pre_m_trial_wTaste_change_HvN
+    Behav: pre_m_trial_wTaste_change_DvN
+
+    % GLM liking_pre~health_rating + taste_rating * condition (weights on
     % health/taste...similar to DDM)
-    % GLM liking_pre/liking_post (change on health/weight)
     
     '42 Qs: bis_overall\n'...
     '43 Qs: bis_attentional\n'...
