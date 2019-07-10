@@ -10,15 +10,17 @@ experiment and analyze data yourself.
 Running the Experiment
 ----------------------
 
-
-The experiment runs using Psychopy 3.1.
-
 The experiment protocol can be found on Dropbox at
-``DJW_Projects/01_MADE/PAPERWORK/MADE_v3_Protocol.gdoc``
+``DJW_Projects/02_FOOD_REG/PAPERWORK/fMRI_Food_Regulation_Experiment_Protocol.gdoc``
 
-The questionnaire is hosted on Qualtrix.
-Contact daniel.j.wilson@gmail.com for login information.
+The protocol includes information regarding:
 
+- Booking Scanner Time
+- Recruiting Participants
+- Running Study
+
+The study questionnaire is a Google Form, and lives on the lab's
+Google Drive account.
 
 ----------------------
 Updating Documentation
