@@ -1,7 +1,10 @@
 Cognitive Regulation fMRI Study
 ===============================
-- Explore the neural correlates of cognitive regulation using a food choice task.
-    - Do different strategies correspond to different representation?
+- Explore the neural correlates of cognitive regulation using
+  a food choice task.
+
+    - Do different strategies correspond to different representations?
+
 - Look at the lasting effects of applying cognitive regulation.
     - Does regulatory strategy affect our future opinions of a food option?
 
