@@ -1,6 +1,19 @@
-================
-Project Versions
-================
+==================
+Experiment Details
+==================
+
+---------
+Main Task
+---------
+
+----------
+Localizers
+----------
+
+--------------
+Questionnaires
+--------------
+
 
 All versions of the project were created in `Psychopy`_.
 The code for all `experiment versions`_ is on github.

@@ -24,5 +24,5 @@ Links
 
    pages/getting-started
    pages/folder-structure
-   pages/project-versions
+   pages/experiment-details
    pages/data-analysis

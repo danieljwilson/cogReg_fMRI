@@ -10,7 +10,7 @@ Cognitive Regulation fMRI Study
   - Does regulatory strategy affect our future opinions of a food option?
 
 .. image:: https://readthedocs.org/projects/cognitive-regulation-fmri-project/badge/?version=latest
-   :target: https://cognitive-regulation-fmri-project.readthedocs.io/en/latest/?badge=latest
+   :target: https://cognitive-regulation-fmri-project.readthedocs.io/en/latest/?badge=latest&style=for-the-badge
    :alt: Documentation Status
 
 Documentation

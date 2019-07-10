@@ -3,9 +3,17 @@
 Data Analysis
 =============
 
----------------
-Data Processing
----------------
+------------------
+fMRI Preprocessing
+------------------
+
+fmriprep
+--------
+
+
+SciNet
+------
+
 
 The `data preprocessing notebook`_ contains the code for:
 
