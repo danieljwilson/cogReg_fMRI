@@ -79,8 +79,40 @@ Example: ::
 
 .. _General linear model scripts: https://github.com/danieljwilson/cogReg_fMRI/tree/master/3_experiment/3_3_data_analysis_fr/spm
 
+
+----------
+Behavioral
+----------
+
+A ``Jupyter`` notebook (using an ``R`` kernel) for the `behavioral results`_.
+
+.. _behavioral results: https://github.com/danieljwilson/cogReg_fMRI/blob/master/3_experiment/3_3_data_analysis_fr/fr_results_behavioral.ipynb
+
+DDM
+---
+
+We fit both a base model and constant model (with an additional
+*constant* parameter that is added to the drift).
+
+The `DDM model scripts`_.
+
+A ``Jupyter`` notebook (using an ``R`` kernel) for the `ddm results`_.
+
+.. _ddm results: https://github.com/danieljwilson/cogReg_fMRI/blob/master/3_experiment/3_3_data_analysis_fr/fr_results_ddm.ipynb
+.. _DDM model scripts: https://github.com/danieljwilson/cogReg_fMRI/tree/master/3_experiment/3_3_data_analysis_fr/ddm
+
+------
+Neural
+------
+
+A ``Jupyter`` notebook (using an ``R`` kernel) for the `neural results`_.
+
+.. _neural results: https://github.com/danieljwilson/cogReg_fMRI/blob/master/3_experiment/3_3_data_analysis_fr/fr_results_neural.ipynb
+
 ------------
 Correlations
 ------------
 
 TO BE ADDED...
+
+
