@@ -1,0 +1,55 @@
+# beta plots for analysis using mask R_dlPFC_sphere_6mm_image_-42_36_18_1_Preference_All-Preference 
+# Model 1_Preference, preference
+# Graph method = Ave 
+# betaweights<- c( 1.3348, 1.3634, 1.6998)
+# stderror<- c( 0.4784, 0.5209, 0.5484)
+# cstderror<- c( 0.4554, 0.3828, 0.4260)
+# barcolor = "DimGray"
+# sigtext = '*'
+# figurename = "Figures/Plot_1_Preference_preference_Ave_R_dlPFC_sphere_6mm_image_-42_36_18_1_Preference_All-Preference"
+
+
+# beta plots for analysis using mask R_dlPFC_sphere_6mm_image_-42_36_18_1_Preference_All-Preference 
+# Model 5_preference_a_reg_success_lasting, PrePostSuccess
+# Graph method = Ave 
+# betaweights<- c( -1.0152, 0.1303, 0.3321)
+# stderror<- c( 0.4214, 0.3092, 0.3329)
+# cstderror<- c( 0.3443, 0.2516, 0.3243)
+# barcolor = "DimGray"
+# sigtext = '*'
+# figurename = "Figures/Plot_5_preference_a_reg_success_lasting_PrePostSuccess_Ave_R_dlPFC_sphere_6mm_image_-42_36_18_1_Preference_All-Preference"
+
+
+# beta plots for analysis using mask R_dlPFC_sphere_6mm_image_-42_36_18_1_Preference_All-Preference 
+# Model 4_preference_a_pre_m_post, PrePostSuccess
+# Graph method = Ave 
+# betaweights<- c( 0.2079, 0.8157, 0.4408)
+# stderror<- c( 0.3899, 0.2674, 0.3461)
+# cstderror<- c( 0.2703, 0.2454, 0.2575)
+# barcolor = "DimGray"
+# sigtext = '*'
+# figurename = "Figures/Plot_4_preference_a_pre_m_post_PrePostSuccess_Ave_R_dlPFC_sphere_6mm_image_-42_36_18_1_Preference_All-Preference"
+
+
+# beta plots for analysis using mask R_dlPFC_sphere_6mm_image_-42_36_18_1_Preference_All-Preference 
+# Model 2_taste_a_health, TasteHealth
+# Graph method = Ave 
+# betaweights<- c( 0.7805, 0.4799, 0.3856, -0.1349, 0.6634, 0.7337)
+# stderror<- c( 0.2250, 0.2913, 0.2650, 0.2685, 0.2957, 0.2134)
+# cstderror<- c( 0.2184, 0.2708, 0.2312, 0.2366, 0.2488, 0.2135)
+# barcolor = "DimGray"
+# sigtext = '*'
+# figurename = "Figures/Plot_2_taste_a_health_TasteHealth_Ave_R_dlPFC_sphere_6mm_image_-42_36_18_1_Preference_All-Preference"
+
+
+# beta plots for analysis using mask R_dlPFC_sphere_6mm_image_-42_36_18_1_Preference_All-Preference 
+# Model 1_Preference, main
+# Graph method = Ave 
+# betaweights<- c( 15.8769, 13.9136, 16.3337)
+# stderror<- c( 1.4145, 1.3205, 1.3855)
+# cstderror<- c( 0.4844, 0.4732, 0.5596)
+# barcolor = "DimGray"
+# sigtext = '*'
+# figurename = "Figures/Plot_1_Preference_main_Ave_R_dlPFC_sphere_6mm_image_-42_36_18_1_Preference_All-Preference"
+
+
