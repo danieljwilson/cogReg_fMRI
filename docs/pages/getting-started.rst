@@ -22,6 +22,15 @@ The protocol includes information regarding:
 The study questionnaire is a Google Form, and lives on the lab's
 Google Drive account.
 
+------------
+Data Storage
+------------
+
+All data (raw and processed) are stored on external hard drive ``CH_ext_001``.
+All files are in the folcer ``2019_FoodReg_fMRI/``.
+
+Note that this drive is password protected.
+
 ----------------------
 Updating Documentation
 ----------------------
