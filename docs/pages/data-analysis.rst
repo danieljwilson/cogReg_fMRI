@@ -57,7 +57,7 @@ More information can be found `here`_ about options.
 GLMs
 ----
 
-General linear model scripts were run using ``MATLAB`` and ``SPM 8``.
+`General linear model scripts`_ were run using ``MATLAB`` and ``SPM 8``.
 
 The model regressors are specificed by the files ending in ``analyze2``.
 
