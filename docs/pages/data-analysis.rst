@@ -57,10 +57,27 @@ More information can be found `here`_ about options.
 GLMs
 ----
 
-General linear models were run using ``MATLAB`` and ``SPM 8``.
+General linear model scripts were run using ``MATLAB`` and ``SPM 8``.
 
+The model regressors are specificed by the files ending in ``analyze2``.
 
+The contrasts are calculated in the files that start with ``contrast2``.
 
+The second level/group analyses are performed by the ``rfx_par`` script.
+
+While the ``analyze`` and ``contrast`` scripts can be run just with the
+function, you need to use the following syntax to run the ``rfx_par``
+script. Note that you need to provide access to a contrast file.
+
+Example: ::
+
+    f = fullfile('8_pre_liking', preproc_version, 'm8_pre_liking_cons.mat');
+    load(f);
+    for con = 1:length(cname)
+    rfx_par('8_pre_liking',cname(con),good_subjects,preproc_version)
+    end
+
+.. _General linear model scripts: https://github.com/danieljwilson/cogReg_fMRI/tree/master/3_experiment/3_3_data_analysis_fr/spm
 
 ------------
 Correlations
