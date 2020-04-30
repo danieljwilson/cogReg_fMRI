@@ -15,7 +15,7 @@ detach("package:Rmisc", unload=TRUE)
 source("helper_functions.R")
 
 #### Load Data ####
-load("FoodRegfMRI_dt.RData")
+load("../data/FoodRegfMRI_dt.RData")
 dt = full_dt
 
 # number of rows with NA values (example row 281/291...):

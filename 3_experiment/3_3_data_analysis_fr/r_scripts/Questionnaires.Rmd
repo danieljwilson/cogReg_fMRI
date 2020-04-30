@@ -13,7 +13,7 @@ library(tidyverse); library(data.table); library(broom); library(dtplyr); librar
 library(tibble)
 
 # Read in data
-df = as.tibble(read_csv("data/questionnaires.csv"), stringsAsFactors = FALSE)
+df = as.tibble(read_csv("../data/questionnaires.csv"), stringsAsFactors = FALSE)
 # Select fMRI study subjects
 fmri_sub <- grepl("FRMRI*", df[, 2][[1]])
 df = df[fmri_sub, ]
@@ -35,7 +35,7 @@ good_subjects = c(101:104, 106:112, 114, 116, 118:121, 123:126, 129:137, 139:140
 df_good = df[df$subject %in% good_subjects,]
 
 # Questions about strategy
-df1  = df[,14:28]
+df1  = df[,c(1:2,14:28)]
 df2 = rev(df)[,1:12]
 
 df_strategy = cbind(df1, df2)

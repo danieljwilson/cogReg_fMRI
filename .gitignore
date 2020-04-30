@@ -32,3 +32,4 @@ docs/build
 # Jupyter Notebook #
 ####################
 *.ipynb_checkpoints 
+.Rproj.user
