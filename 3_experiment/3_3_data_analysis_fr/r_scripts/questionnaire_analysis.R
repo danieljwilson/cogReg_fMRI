@@ -79,3 +79,6 @@ df_good = df[df$demo_id %in% good_subjects,]
 # Remove extra questionnaire cols
 dfc = df_good[,1:40]
 
+# Export CSV
+write.csv(Your DataFrame,"Path where you'd like to export the DataFrame\\File Name.csv", row.names = FALSE)
+
