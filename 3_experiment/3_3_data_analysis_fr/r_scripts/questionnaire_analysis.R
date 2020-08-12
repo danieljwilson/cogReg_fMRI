@@ -1,6 +1,7 @@
 
 #### LOAD LIBRARIES ####
 library(tidyverse)
+library(data.table)
 
 #### READ IN DATA ####
 df = as.tibble(read_csv("../data/questionnaires.csv"), stringsAsFactors = FALSE)
